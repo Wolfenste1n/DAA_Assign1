@@ -1,3 +1,15 @@
+# Maven
+target/
+
+# IDE
+.idea/
+*.iml
+
+# Build artifacts
+*.class
+
+# OS
+.DS_Store
 ### IntelliJ IDEA ###
 out/
 !**/src/main/**/out/
