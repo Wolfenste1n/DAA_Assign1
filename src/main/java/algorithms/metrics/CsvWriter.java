@@ -1,42 +1,40 @@
 package algorithms.metrics;
 
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
 
+public class CsvWriter {
+    private final File file;
+    private final String header;
 
-public class CsvWriter implements AutoCloseable {
-    private final BufferedWriter bw;
-    private boolean headerWritten = false;
+    public CsvWriter(String path, String header) {
+        this.file = new File(path);
+        this.header = header;
+    }
 
-    public CsvWriter(Path path, boolean append) throws IOException {
-        Path parent = path.getParent();
-        if (parent != null) Files.createDirectories(parent);
-        if (append) {
-            bw = Files.newBufferedWriter(path, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-        } else {
-            bw = Files.newBufferedWriter(path, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+    public synchronized void writeHeaderIfNeeded() {
+        try {
+            boolean needHeader = !file.exists() || file.length() == 0;
+            file.getParentFile().mkdirs();
+            if (needHeader) {
+                try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true))) {
+                    bw.write(header);
+                    bw.newLine();
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public synchronized void writeHeader(String header) throws IOException {
-        if (!headerWritten) {
-            bw.write(header);
+    public synchronized void writeRow(String row) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true))) {
+            bw.write(row);
             bw.newLine();
-            bw.flush();
-            headerWritten = true;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-    }
-
-    public synchronized void writeRow(String row) throws IOException {
-        bw.write(row);
-        bw.newLine();
-        bw.flush();
-    }
-
-    @Override
-    public synchronized void close() throws IOException {
-        bw.close();
     }
 }

@@ -2,9 +2,9 @@ package algorithms.metrics;
 
 public class Metrics {
     private long comparisons = 0;
-    private long assignments = 0;
-    private int currDepth = 0;
-    private int maxDepth = 0;
+    private long allocations = 0;
+    private int recursionDepth = 0;
+    private int maxRecursionDepth = 0;
     private long startNs = 0;
     private long elapsedNs = 0;
 
@@ -20,40 +20,31 @@ public class Metrics {
     }
 
     public synchronized void incComparisons() { comparisons++; }
-    public synchronized void incComparisons(long delta) { comparisons += delta; }
+    public synchronized void incComparisons(long d) { comparisons += d; }
 
-    public synchronized void incAssignments() { assignments++; }
-    public synchronized void incAssignments(long delta) { assignments += delta; }
+    public synchronized void incAllocations() { allocations++; }
+    public synchronized void incAllocations(long d) { allocations += d; }
 
     public synchronized void enterRecursion() {
-        currDepth++;
-        if (currDepth > maxDepth) maxDepth = currDepth;
+        recursionDepth++;
+        if (recursionDepth > maxRecursionDepth) maxRecursionDepth = recursionDepth;
     }
 
     public synchronized void exitRecursion() {
-        currDepth--;
-        if (currDepth < 0) currDepth = 0;
+        recursionDepth--;
+        if (recursionDepth < 0) recursionDepth = 0;
     }
 
     public synchronized long getComparisons() { return comparisons; }
-    public synchronized long getAssignments() { return assignments; }
-    public synchronized int getMaxDepth() { return maxDepth; }
+    public synchronized long getAllocations() { return allocations; }
+    public synchronized int getMaxRecursionDepth() { return maxRecursionDepth; }
     public synchronized long getElapsedNs() { return elapsedNs; }
 
-    public synchronized void reset() {
-        comparisons = 0;
-        assignments = 0;
-        currDepth = 0;
-        maxDepth = 0;
-        startNs = 0;
-        elapsedNs = 0;
-    }
-
     public synchronized String csvHeader() {
-        return "n;time_ns;comparisons;assignments;max_depth";
+        return "algo,n,time_ns,comparisons,allocations,max_recursion_depth";
     }
 
-    public synchronized String csvRow(int n) {
-        return n + ";" + elapsedNs + ";" + comparisons + ";" + assignments + ";" + maxDepth;
+    public synchronized String csvRow(String algo, int n) {
+        return algo + "," + n + "," + elapsedNs + "," + comparisons + "," + allocations + "," + maxRecursionDepth;
     }
 }
