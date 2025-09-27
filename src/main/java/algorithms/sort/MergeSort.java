@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public final class MergeSort {
+
     private static final int CUTOFF = 16;
 
     private MergeSort() { }
