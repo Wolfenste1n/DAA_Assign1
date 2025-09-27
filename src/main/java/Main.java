@@ -71,6 +71,5 @@ public class Main {
             writerClosest.writeRow("ClosestPair," + n + "," + distance + "," + elapsed);
         }
 
-        System.out.println("Эксперименты завершены. Результаты в папке results/");
     }
 }
