@@ -8,38 +8,39 @@ import java.nio.file.*;
 public class CsvWriter implements AutoCloseable {
     private final Path path;
     private final String header;
-    private final boolean append;
+    private final boolean managedWriter;
     private BufferedWriter bw;
 
-    public CsvWriter(Path path, boolean append) throws IOException {
-        this.path = path;
-        this.header = null;
-        this.append = append;
-        Path parent = path.getParent();
-        if (parent != null) Files.createDirectories(parent);
-        OpenOption[] opts = append
-                ? new OpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.APPEND}
-                : new OpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING};
-        this.bw = Files.newBufferedWriter(path, StandardCharsets.UTF_8, opts);
+    public CsvWriter(String pathStr, String header) {
+        this(Path.of(pathStr), header, false);
     }
 
-    public CsvWriter(String pathStr, String header) {
-        this.path = Paths.get(pathStr);
-        this.header = header;
-        this.append = true;
-        try {
-            Path parent = this.path.getParent();
-            if (parent != null) Files.createDirectories(parent);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    public CsvWriter(Path path, boolean append) throws IOException {
+        this(path, null, true);
+        Path parent = path.getParent();
+        if (parent != null) Files.createDirectories(parent);
+        if (append) {
+            this.bw = Files.newBufferedWriter(path, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } else {
+            this.bw = Files.newBufferedWriter(path, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         }
+    }
+
+    private CsvWriter(Path path, String header, boolean managedWriter) {
+        this.path = path;
+        this.header = header;
+        this.managedWriter = managedWriter;
+        this.bw = null;
     }
 
     public synchronized void writeHeaderIfNeeded() {
         try {
-            boolean needHeader = !Files.exists(path) || Files.size(path) == 0;
+            Path p = path;
+            Path parent = p.getParent();
+            if (parent != null) Files.createDirectories(parent);
+            boolean needHeader = !Files.exists(p) || Files.size(p) == 0;
             if (needHeader && header != null) {
-                try (BufferedWriter w = Files.newBufferedWriter(path, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
+                try (BufferedWriter w = Files.newBufferedWriter(p, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
                     w.write(header);
                     w.newLine();
                 }
@@ -49,23 +50,32 @@ public class CsvWriter implements AutoCloseable {
         }
     }
 
-    public synchronized void writeHeader(String header) {
-        try (BufferedWriter w = Files.newBufferedWriter(path, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
-            w.write(header);
-            w.newLine();
+    public synchronized void writeRow(String row) {
+        try {
+            if (managedWriter) {
+                bw.write(row);
+                bw.newLine();
+                bw.flush();
+            } else {
+                try (BufferedWriter w = Files.newBufferedWriter(path, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
+                    w.write(row);
+                    w.newLine();
+                }
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public synchronized void writeRow(String row) {
+    public synchronized void writeHeader(String headerLine) {
         try {
-            if (bw == null) {
-                bw = Files.newBufferedWriter(path, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            Path p = path;
+            Path parent = p.getParent();
+            if (parent != null) Files.createDirectories(parent);
+            try (BufferedWriter w = Files.newBufferedWriter(p, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
+                w.write(headerLine);
+                w.newLine();
             }
-            bw.write(row);
-            bw.newLine();
-            bw.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

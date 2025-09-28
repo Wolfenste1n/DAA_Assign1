@@ -2,6 +2,7 @@ package algorithms.closest;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.ArrayList;
 
 public class ClosestPair {
     public static class Point {
@@ -29,13 +30,14 @@ public class ClosestPair {
         Point[] leftX = Arrays.copyOfRange(ptsSortedByX, 0, mid);
         Point[] rightX = Arrays.copyOfRange(ptsSortedByX, mid, n);
 
-        Point[] leftY = new Point[mid];
-        Point[] rightY = new Point[n - mid];
-        int li = 0, ri = 0;
+        ArrayList<Point> leftList = new ArrayList<>();
+        ArrayList<Point> rightList = new ArrayList<>();
         for (Point p : ptsSortedByY) {
-            if (p.x <= midPoint.x) leftY[li++] = p;
-            else rightY[ri++] = p;
+            if (p.x <= midPoint.x) leftList.add(p);
+            else rightList.add(p);
         }
+        Point[] leftY = leftList.toArray(new Point[0]);
+        Point[] rightY = rightList.toArray(new Point[0]);
 
         double dl = closestUtil(leftX, leftY);
         double dr = closestUtil(rightX, rightY);
