@@ -20,10 +20,10 @@ public class Metrics {
     }
 
     public synchronized void incComparisons() { comparisons++; }
-    public synchronized void incComparisons(long delta) { comparisons += delta; }
+    public synchronized void incComparisons(long d) { comparisons += d; }
 
     public synchronized void incAssignments() { assignments++; }
-    public synchronized void incAssignments(long delta) { assignments += delta; }
+    public synchronized void incAssignments(long d) { assignments += d; }
 
     public synchronized void enterRecursion() {
         currDepth++;
