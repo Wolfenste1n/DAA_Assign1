@@ -3,7 +3,6 @@ package algorithms.metrics;
 public class Metrics {
     private long comparisons = 0;
     private long assignments = 0;
-    private long allocations = 0;
     private int currDepth = 0;
     private int maxDepth = 0;
     private long startNs = 0;
@@ -26,9 +25,6 @@ public class Metrics {
     public synchronized void incAssignments() { assignments++; }
     public synchronized void incAssignments(long d) { assignments += d; }
 
-    public synchronized void incAllocations() { allocations++; }
-    public synchronized void incAllocations(long d) { allocations += d; }
-
     public synchronized void enterRecursion() {
         currDepth++;
         if (currDepth > maxDepth) maxDepth = currDepth;
@@ -41,16 +37,12 @@ public class Metrics {
 
     public synchronized long getComparisons() { return comparisons; }
     public synchronized long getAssignments() { return assignments; }
-    public synchronized long getAllocations() { return allocations; }
     public synchronized int getMaxDepth() { return maxDepth; }
-
-    public synchronized int getMaxRecursionDepth() { return maxDepth; }
-
     public synchronized long getElapsedNs() { return elapsedNs; }
+
     public synchronized void reset() {
         comparisons = 0;
         assignments = 0;
-        allocations = 0;
         currDepth = 0;
         maxDepth = 0;
         startNs = 0;
@@ -64,10 +56,4 @@ public class Metrics {
     public synchronized String csvRow(int n) {
         return n + ";" + elapsedNs + ";" + comparisons + ";" + assignments + ";" + maxDepth;
     }
-
-    public synchronized String csvRow(String algo, int n) {
-        return algo + "," + n + "," + elapsedNs + "," + comparisons + "," + allocations + "," + maxDepth;
-    }
-
-
 }
