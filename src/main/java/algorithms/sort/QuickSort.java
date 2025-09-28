@@ -6,6 +6,7 @@ public class QuickSort {
     private static final Random random = new Random();
 
     public static void sort(int[] arr) {
+        if (arr == null || arr.length < 2) return;
         quicksort(arr, 0, arr.length - 1);
     }
 
@@ -26,18 +27,19 @@ public class QuickSort {
         int pivotIndex = low + random.nextInt(high - low + 1);
         swap(arr, pivotIndex, high);
         int pivot = arr[high];
-        int i = low - 1;
+        int i = low;
         for (int j = low; j < high; j++) {
             if (arr[j] <= pivot) {
-                i++;
                 swap(arr, i, j);
+                i++;
             }
         }
-        swap(arr, i + 1, high);
-        return i + 1;
+        swap(arr, i, high);
+        return i;
     }
 
     private static void swap(int[] arr, int i, int j) {
+        if (i == j) return;
         int temp = arr[i];
         arr[i] = arr[j];
         arr[j] = temp;

@@ -7,12 +7,12 @@ import java.util.ArrayList;
 public class ClosestPair {
     public static class Point {
         public final double x, y;
-        public Point(double x, double y) {
-            this.x = x; this.y = y;
-        }
+        public Point(double x, double y) { this.x = x; this.y = y; }
     }
 
     public static double closestPair(Point[] points) {
+        if (points == null || points.length < 2) return Double.POSITIVE_INFINITY;
+        if (points.length == 2) return distance(points[0], points[1]);
         Point[] ptsSortedByX = points.clone();
         Arrays.sort(ptsSortedByX, Comparator.comparingDouble(p -> p.x));
         Point[] ptsSortedByY = points.clone();
@@ -23,13 +23,10 @@ public class ClosestPair {
     private static double closestUtil(Point[] ptsSortedByX, Point[] ptsSortedByY) {
         int n = ptsSortedByX.length;
         if (n <= 3) return bruteForce(ptsSortedByX);
-
         int mid = n / 2;
         Point midPoint = ptsSortedByX[mid];
-
         Point[] leftX = Arrays.copyOfRange(ptsSortedByX, 0, mid);
         Point[] rightX = Arrays.copyOfRange(ptsSortedByX, mid, n);
-
         ArrayList<Point> leftList = new ArrayList<>();
         ArrayList<Point> rightList = new ArrayList<>();
         for (Point p : ptsSortedByY) {
@@ -38,11 +35,9 @@ public class ClosestPair {
         }
         Point[] leftY = leftList.toArray(new Point[0]);
         Point[] rightY = rightList.toArray(new Point[0]);
-
         double dl = closestUtil(leftX, leftY);
         double dr = closestUtil(rightX, rightY);
         double d = Math.min(dl, dr);
-
         return Math.min(d, stripClosest(ptsSortedByY, midPoint.x, d));
     }
 
@@ -61,7 +56,6 @@ public class ClosestPair {
         Point[] strip = Arrays.stream(ptsSortedByY)
                 .filter(p -> Math.abs(p.x - midX) < d)
                 .toArray(Point[]::new);
-
         double min = d;
         for (int i = 0; i < strip.length; i++) {
             for (int j = i + 1; j < strip.length && (strip[j].y - strip[i].y) < min; j++) {

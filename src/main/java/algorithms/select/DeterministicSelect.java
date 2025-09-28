@@ -4,35 +4,27 @@ import java.util.Arrays;
 
 public class DeterministicSelect {
     public static int select(int[] arr, int k) {
-        if (arr == null || arr.length == 0 || k < 0 || k >= arr.length) {
+        if (arr == null || arr.length == 0 || k < 0 || k >= arr.length)
             throw new IllegalArgumentException("Invalid input");
-        }
         return select(arr, 0, arr.length - 1, k);
     }
 
     private static int select(int[] arr, int left, int right, int k) {
         while (true) {
-            if (left == right) {
-                return arr[left];
-            }
+            if (left == right) return arr[left];
             int pivot = medianOfMedians(arr, left, right);
             int pivotIndex = partition(arr, left, right, pivot);
-            if (k == pivotIndex) {
-                return arr[k];
-            } else if (k < pivotIndex) {
-                right = pivotIndex - 1;
-            } else {
-                left = pivotIndex + 1;
-            }
+            if (k == pivotIndex) return arr[k];
+            else if (k < pivotIndex) right = pivotIndex - 1;
+            else left = pivotIndex + 1;
         }
     }
 
     private static int partition(int[] arr, int left, int right, int pivot) {
-        int i = left;
-        int j = right;
+        int i = left, j = right;
         while (i <= j) {
-            while (arr[i] < pivot) i++;
-            while (arr[j] > pivot) j--;
+            while (i <= right && arr[i] < pivot) i++;
+            while (j >= left && arr[j] > pivot) j--;
             if (i <= j) {
                 swap(arr, i, j);
                 i++;
@@ -43,6 +35,7 @@ public class DeterministicSelect {
     }
 
     private static void swap(int[] arr, int i, int j) {
+        if (i == j) return;
         int tmp = arr[i];
         arr[i] = arr[j];
         arr[j] = tmp;
